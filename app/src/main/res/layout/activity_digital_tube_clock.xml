@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:id="@+id/bg"
+    tools:context=".Timer.DigitalTubeClockActivity">
+
+    <!--
+      android:shadowColor 阴影颜色
+      android:shadowDx 阴影的水平偏移量
+      android:shadowDy 阴影的垂直偏移量
+      android:shadowRadius 阴影的范围
+    -->
+    <TextView
+        android:id="@+id/solar_terms_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="春分"
+        android:layout_marginTop="100dp"
+        android:layout_centerHorizontal="true"
+        android:textSize="40sp"
+        android:textColor="@color/white"
+        ></TextView>
+    <TextView
+        android:id="@+id/solar_terms"
+        android:layout_width="300dp"
+        android:layout_height="150dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:text="    2月3日-2月4日：表示严冬已逝，春季到来，气温回升，万物复苏，"
+        android:textColor="@color/white"
+        android:layout_below="@+id/solar_terms_name"
+        android:textSize="16sp"
+        ></TextView>
+
+    <TextView
+        android:id="@+id/ledview_clock_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:shadowColor="#FFFFFF"
+        android:shadowDx="0"
+        android:shadowDy="0"
+        android:shadowRadius="20"
+        android:textColor="#FFFFFF"
+        android:textSize="100sp" />
+
+    <TextView
+        android:id="@+id/ledview_clock_bg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:textColor="#33DFDFDF"
+        android:textSize="100sp" />
+
+
+    <RelativeLayout
+        android:id="@+id/week_box"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/ledview_clock_bg">
+
+        <TextView
+            android:id="@+id/Monday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:text="周一"
+            android:textColor="#A8A8A8"></TextView>
+
+        <TextView
+            android:id="@+id/Tuesday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:layout_toRightOf="@+id/Monday"
+            android:text="周二"
+            android:textColor="#A8A8A8"></TextView>
+        <TextView
+            android:id="@+id/Wednesday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="周三"
+            android:textColor="#A8A8A8"
+            android:layout_toRightOf="@+id/Tuesday"
+            android:layout_marginRight="5dp"
+            ></TextView>
+        <TextView
+            android:id="@+id/Thursday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="周四"
+            android:textColor="#A8A8A8"
+            android:layout_toRightOf="@+id/Wednesday"
+            android:layout_marginRight="5dp"
+            ></TextView>
+        <TextView
+            android:id="@+id/Friday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="周五"
+            android:textColor="#A8A8A8"
+            android:layout_toRightOf="@+id/Thursday"
+            android:layout_marginRight="5dp"
+            ></TextView>
+        <TextView
+            android:id="@+id/Saturday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="周六"
+            android:textColor="#A8A8A8"
+            android:layout_toRightOf="@+id/Friday"
+            android:layout_marginRight="5dp"
+            ></TextView>
+        <TextView
+            android:id="@+id/Sunday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="周日"
+            android:textColor="#A8A8A8"
+            android:layout_toRightOf="@+id/Saturday"
+            android:layout_marginRight="5dp"
+            ></TextView>
+    </RelativeLayout>
+
+    <TextClock
+        android:id="@+id/dateText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/week_box"
+        android:layout_marginTop="130dp"
+        android:format12Hour="yyyy-MM-dd"
+        android:format24Hour="yyyy-MM-dd"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="32sp" />
+
+
+    <TextView
+        android:id="@+id/battery_percent"
+        android:layout_width="40dp"
+        android:layout_height="15dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:text="100%"
+        android:textColor="@color/white"
+        android:textSize="13sp"></TextView>
+
+    <com.example.countdown.Utils.BatteryView
+        android:id="@+id/battery_view_icon"
+        android:layout_width="30dp"
+        android:layout_height="15dp"
+        android:layout_marginTop="40dp"
+        android:layout_toLeftOf="@+id/battery_percent"></com.example.countdown.Utils.BatteryView>
+</RelativeLayout>

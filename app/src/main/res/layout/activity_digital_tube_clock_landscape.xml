@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:context=".Timer.DigitalTubeClockActivity">
+
+    <!--
+      android:shadowColor 阴影颜色
+      android:shadowDx 阴影的水平偏移量
+      android:shadowDy 阴影的垂直偏移量
+      android:shadowRadius 阴影的范围
+    -->
+    <com.example.countdown.Utils.BatteryView
+        android:id="@+id/battery_view_icon"
+        android:layout_width="30dp"
+        android:layout_height="15dp"
+        android:layout_marginTop="40dp"
+        android:layout_toLeftOf="@+id/battery_percent"
+        ></com.example.countdown.Utils.BatteryView>
+
+    <TextView
+        android:id="@+id/battery_percent"
+        android:layout_width="40dp"
+        android:layout_height="15dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:text="100%"
+        android:textColor="@color/white"
+        android:textSize="13sp"></TextView>
+    <TextView
+        android:id="@+id/ledview_clock_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:shadowColor="#FFFFFF"
+        android:shadowDx="0"
+        android:shadowDy="0"
+        android:shadowRadius="20"
+        android:textColor="#FFFFFF"
+        android:gravity="center"
+        android:textSize="185sp" />
+
+    <TextView
+        android:id="@+id/ledview_clock_bg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:textColor="#33DFDFDF"
+        android:textSize="185sp" />
+
+    <TextClock
+        android:id="@+id/dateText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ledview_clock_bg"
+        android:layout_marginTop="20dp"
+        android:format12Hour="yyyy-MM-dd"
+        android:format24Hour="yyyy-MM-dd"
+        android:layout_marginLeft="150dp"
+        android:textColor="@color/white"
+        android:textSize="32sp" />
+
+    <TextView
+        android:id="@+id/day_of_week"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="周六"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="150dp"
+        android:layout_marginTop="20dp"
+        android:textSize="24sp"
+        android:textColor="@color/white"
+        android:layout_below="@+id/ledview_clock_bg"
+        ></TextView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        ></TextView>
+</RelativeLayout>

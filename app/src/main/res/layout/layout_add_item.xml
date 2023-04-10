@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="360dp"
+        android:layout_height="100dp"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/style_radiu"
+
+        >
+
+        <TextView
+            android:id="@+id/activity_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:text="123"
+            android:textColor="#e9e7ef"
+            android:textSize="30dp"></TextView>
+
+        <TextView
+            android:id="@+id/setting_day"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/activity_name"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:text="2022-04-15"
+            android:textColor="@color/black"></TextView>
+
+<!--        <RelativeLayout-->
+<!--            android:id="@+id/rl_residue_box"-->
+<!--            android:layout_width="200dp"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:layout_alignParentRight="true">-->
+
+            <TextView
+                android:id="@+id/residue_day"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="5dp"
+                android:layout_toLeftOf="@+id/residue"
+                android:text="1"
+                android:textSize="60dp"></TextView>
+
+
+            <TextView
+                android:id="@+id/residue"
+                android:layout_width="40dp"
+                android:layout_height="30dp"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="45dp"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/style_radiu_line"
+                android:gravity="center"
+                android:text="天后"
+                android:textColor="#e9e7ef"></TextView>
+<!--        </RelativeLayout>-->
+
+
+        <TextView
+            android:id="@+id/tip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/setting_day"
+            android:layout_marginLeft="5dp"
+            android:text="备注："
+            android:textSize="20dp"></TextView>
+    </RelativeLayout>
+</RelativeLayout>
