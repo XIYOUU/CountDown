@@ -140,12 +140,6 @@ public class IndexFragment extends Fragment {
                     String time_pick = data.getStringExtra("time_pick");
                     String position = data.getStringExtra("position");
                     if(position != null){//当有更新操作
-//                        mRecycleViewList.get(Integer.parseInt(position)).setActivity_name(activity_title);
-//                        mRecycleViewList.get(Integer.parseInt(position)).setActivity_tip(activity_tip);
-//                        mRecycleViewList.get(Integer.parseInt(position)).setSetting_day(time_pick);
-//                        AscSort();
-//                        SaveData(mRecycleViewList);
-//                        mAdapter.notifyDataSetChanged();
                         UpdateData(position,activity_title,activity_tip,time_pick);
                     }else{//保存插入操作
                         InsertDate(activity_title, time_pick, activity_tip);
