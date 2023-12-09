@@ -12,17 +12,17 @@
         android:roundIcon="@drawable/shiji_icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.CountDown">
+
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-9901957772562324~9651597841" />
+
         <activity
             android:name=".TestAdv"
-            android:exported="true" >
-
-        </activity>
+            android:exported="true"></activity>
         <activity
             android:name=".Timer.DigitalTubeClockActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".index.AddItemActivity"
             android:exported="false" />
@@ -38,8 +38,7 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:exported="true" /> <!-- Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713 -->
-
+            android:exported="true" />
     </application>
 
 </manifest>

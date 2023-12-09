@@ -32,22 +32,32 @@ public class AddItemActivity extends AppCompatActivity {
     private TextView time_pick;
     private EditText activity_title;
     private EditText activity_tip;
-
+    String position;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_item);
 
         initView();
+        initData();
 
+        /*如果是修改Item，则将数据传进来并显示*/
+        getItemDataAndSend();
 
+        rl_date.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showDatePickerDialog(AddItemActivity.this,3,time_pick,cale);
+            }
+        });
+        //返回按钮
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 finish();
             }
         });
-
+        //点击完成退回到主界面
         finish.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -61,21 +71,10 @@ public class AddItemActivity extends AppCompatActivity {
                 intent.putExtra("activity_title",activity_title);
                 intent.putExtra("activity_tip",activity_tip);
                 intent.putExtra("time_pick",time_pick);
+                intent.putExtra("position",position);
                 setResult(1,intent);
 
                 finish();
-            }
-        });
-
-
-        /*初始的时间是系统时间*/
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        String format = df.format(new Date());
-        time_pick.setText(format);
-        rl_date.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showDatePickerDialog(AddItemActivity.this,3,time_pick,cale);
             }
         });
     }
@@ -91,11 +90,18 @@ public class AddItemActivity extends AppCompatActivity {
         activity_tip = (EditText) findViewById(R.id.activity_tip);
     }
 
+    public void initData(){
+        /*如果是添加Item，则初始化时间，初始的时间是系统时间*/
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        String format = df.format(new Date());
+        time_pick.setText(format);
+    }
+
     public void showDatePickerDialog(Activity activity, int themeResId, final TextView tvTime, Calendar calendar) {
         // 直接创建一个DatePickerDialog对话框实例，并将它显示出来
-        new DatePickerDialog(activity, themeResId
+        new DatePickerDialog(activity, themeResId, new DatePickerDialog.OnDateSetListener() {
                 // 绑定监听器(How the parent is notified that the date is set.)
-                , new DatePickerDialog.OnDateSetListener() {
+
             private String times;
 
             @Override
@@ -109,5 +115,19 @@ public class AddItemActivity extends AppCompatActivity {
                 , calendar.get(Calendar.YEAR)
                 , calendar.get(Calendar.MONTH)
                 , calendar.get(Calendar.DAY_OF_MONTH)).show();
+    }
+
+
+    //当用户点击一个Item时，将数据传进来,并将数据发送回去
+    public void getItemDataAndSend(){
+        Intent intent=getIntent();
+
+
+        String setting_day = intent.getStringExtra("setting_day");
+        activity_title.setText(intent.getStringExtra("activity_name"));
+        activity_tip.setText(intent.getStringExtra("activity_tip"));
+        time_pick.setText(intent.getStringExtra("setting_day"));
+//        showDatePickerDialog(AddItemActivity.this,3,time_pick,cale);
+        position = intent.getStringExtra("position");
     }
 }

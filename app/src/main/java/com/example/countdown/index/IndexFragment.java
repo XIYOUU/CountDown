@@ -1,5 +1,6 @@
 package com.example.countdown.index;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,6 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -25,8 +28,10 @@ import android.widget.Toast;
 import com.example.countdown.Bean.ActivityNameItem;
 import com.example.countdown.R;
 import com.example.countdown.Utils.DateSubUtils;
+import com.example.countdown.Utils.SlideRecyclerView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.yanzhenjie.recyclerview.OnItemClickListener;
 import com.yanzhenjie.recyclerview.OnItemMenuClickListener;
 import com.yanzhenjie.recyclerview.SwipeMenu;
 import com.yanzhenjie.recyclerview.SwipeMenuBridge;
@@ -60,15 +65,13 @@ public class IndexFragment extends Fragment {
     private Button read_date;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         v = inflater.inflate(R.layout.fragment_index, container, false);
 
         initView();
         isFirstUse();
         initSlideRecycleView();
-
 
         /*跳转到活动添加页面*/
         add_item.setOnClickListener(new View.OnClickListener() {
@@ -82,6 +85,9 @@ public class IndexFragment extends Fragment {
         return v;
     }
 
+    /**
+     * 初始化控件
+     */
     public void initView() {
         add_item = (TextView) v.findViewById(R.id.add_item);
         rv_slide = (SwipeRecyclerView) v.findViewById(R.id.rv_slide);
@@ -99,10 +105,11 @@ public class IndexFragment extends Fragment {
         /*布局和适配器*/
         rv_slide.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        mAdapter = new SlideAdapter();
+        mAdapter = new SlideAdapter(getActivity(), mRecycleViewList);
 
         rv_slide.setSwipeMenuCreator(mSwipeMenuCreator);        //菜单
         rv_slide.setOnItemMenuClickListener(mItemMenuClickListener);    //菜单点击删除
+        mAdapter.setmOnItemClickListener(mItemClickListener);
         //rv_slide.setOnItemMoveListener(mItemMoveListener);  // 监听拖拽，更新UI。
 
         /*设置间隔*/
@@ -112,14 +119,18 @@ public class IndexFragment extends Fragment {
         /*设置适配器和刷新数据*/
         rv_slide.setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
+
     }
 
-    /*从AddItemActivity中返回创建的活动的数据*/
+
+    /**
+     * 从AddItemActivity中返回创建的活动的数据
+     */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         //这里是一个switch()方法，内置的变量是requestCode,即请求码
         switch (requestCode) {
             //第一个case是1，即对应之前startActivityResult()方法当中的请求码
-            case 1:
+            case 1://创建操作
                 //如果里面的处理结果是和后面一个Activity的setResult()方法当中的第一个参数相同
                 if (resultCode == 1) {
                     //那么就从返回时获取返回的数据
@@ -127,118 +138,24 @@ public class IndexFragment extends Fragment {
                     String activity_title = data.getStringExtra("activity_title");
                     String activity_tip = data.getStringExtra("activity_tip");
                     String time_pick = data.getStringExtra("time_pick");
-                    InsertDate(activity_title, time_pick, activity_tip);
+                    String position = data.getStringExtra("position");
+                    if(position != null){//当有更新操作
+//                        mRecycleViewList.get(Integer.parseInt(position)).setActivity_name(activity_title);
+//                        mRecycleViewList.get(Integer.parseInt(position)).setActivity_tip(activity_tip);
+//                        mRecycleViewList.get(Integer.parseInt(position)).setSetting_day(time_pick);
+//                        AscSort();
+//                        SaveData(mRecycleViewList);
+//                        mAdapter.notifyDataSetChanged();
+                        UpdateData(position,activity_title,activity_tip,time_pick);
+                    }else{//保存插入操作
+                        InsertDate(activity_title, time_pick, activity_tip);
+                    }
 //                    Toast.makeText(getActivity(), "activity_title:" + activity_title, Toast.LENGTH_SHORT).show();
                 }
         }
     }
 
-
-    /**
-     * 可滑动的RecycleView
-     */
-    /*滑动item的适配器*/
-    public class SlideAdapter extends RecyclerView.Adapter<SlideAdapter.SlideViewHolder> {
-        public class SlideViewHolder extends RecyclerView.ViewHolder {
-
-            private final TextView activity_name;
-            private final TextView setting_day;
-            private final TextView tip;
-            private final TextView residue_day;
-            private final TextView residue;
-
-            public SlideViewHolder(@NonNull View itemView) {
-                super(itemView);
-                activity_name = (TextView) itemView.findViewById(R.id.activity_name);
-                setting_day = (TextView) itemView.findViewById(R.id.setting_day);
-                tip = (TextView) itemView.findViewById(R.id.tip);
-                residue_day = (TextView) itemView.findViewById(R.id.residue_day);
-                residue = (TextView) itemView.findViewById(R.id.residue);
-            }
-        }
-
-
-        @NonNull
-        @Override
-        public SlideViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(getActivity()).inflate(R.layout.layout_add_item, null);
-            return new SlideViewHolder(v);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull SlideViewHolder holder, int position) {
-            holder.activity_name.setText(mRecycleViewList.get(position).getActivity_name());
-            holder.setting_day.setText(mRecycleViewList.get(position).getSetting_day());
-
-            /*设置剩余时间*/
-            try {
-                //获取当前系统时间
-                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
-                String format = df.format(new Date());
-                int day = Integer.parseInt(DateSubUtils.getTwoDateSub(mRecycleViewList.get(position).getSetting_day(), format));
-                /*如果天数小于0，则文字置灰*/
-                if (day < 0) {
-                    //System.out.println("第" + position + "项置灰：");
-                    holder.residue_day.setText(-day + "");
-                    holder.residue_day.setTextColor(Color.parseColor("#77666666"));
-                    holder.residue.setText("天前");
-                    holder.residue.setTextColor(Color.parseColor("#77666666"));
-                    holder.residue.setBackgroundResource(R.drawable.style_radiu_line_grey);
-                    holder.activity_name.setTextColor(Color.parseColor("#77666666"));
-                    holder.setting_day.setTextColor(Color.parseColor("#77666666"));
-                    holder.tip.setTextColor(Color.parseColor("#77666666"));
-                }
-                /*如果天数大于0*/
-                else {
-                    holder.residue_day.setText(day + "");
-                    holder.residue_day.setTextColor(Color.parseColor("#8A000000"));
-                    holder.residue.setText("天后");
-                    holder.residue.setTextColor(Color.parseColor("#f0f0f4"));
-                    holder.activity_name.setTextColor(Color.parseColor("#e9e7ef"));
-                    holder.setting_day.setTextColor(Color.parseColor("BLACK"));
-                    holder.tip.setTextColor(Color.parseColor("#8A000000"));
-                }
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-
-            /*设置备注*/
-            if (mRecycleViewList.get(position).getActivity_tip().isEmpty()) {
-                holder.tip.setText("备注：无备注");
-            } else {
-                holder.tip.setText("备注：" + mRecycleViewList.get(position).getActivity_tip());
-            }
-
-
-        }
-
-        @Override
-        public int getItemCount() {
-            return mRecycleViewList.size();
-        }
-    }
-
-    /*设置item间隔*/
-    public class SpacesItemDecoration extends RecyclerView.ItemDecoration {
-        private int space;
-
-        public SpacesItemDecoration(int space) {
-            this.space = space;
-        }
-
-        @Override
-        public void getItemOffsets(Rect outRect, View view,
-                                   RecyclerView parent, RecyclerView.State state) {
-            outRect.left = space;
-            outRect.right = space;
-            outRect.bottom = space;
-
-            // Add top margin only for the first item to avoid double space between items
-            if (parent.getChildPosition(view) == 0)
-                outRect.top = space;
-        }
-    }
-
+    //RecycleView的三个单击方法
     // 创建删除菜单：
     SwipeMenuCreator mSwipeMenuCreator = new SwipeMenuCreator() {
         @Override
@@ -260,7 +177,7 @@ public class IndexFragment extends Fragment {
             }
         }
     };
-    // 菜单点击监听。
+    // 删除Item时监听。
     OnItemMenuClickListener mItemMenuClickListener = new OnItemMenuClickListener() {
         @Override
         public void onItemClick(SwipeMenuBridge menuBridge, int position) {
@@ -271,43 +188,68 @@ public class IndexFragment extends Fragment {
             int direction = menuBridge.getDirection();
             // 菜单在Item中的Position：
             int menuPosition = menuBridge.getPosition();
+//            Toast.makeText(getActivity(), menuPosition+"", Toast.LENGTH_SHORT).show();
             /*删除第position项*/
+//            Toast.makeText(getActivity(), ""+position, Toast.LENGTH_SHORT).show();
             mRecycleViewList.remove(position);
             SaveData(mRecycleViewList);
             mAdapter.notifyItemRemoved(position);
         }
     };
-    /*侧滑和删除*/
-    OnItemMoveListener mItemMoveListener = new OnItemMoveListener() {
-
-
+    // Item的单击事件
+    OnItemClickListener mItemClickListener = new OnItemClickListener() {
         @Override
-        public boolean onItemMove(RecyclerView.ViewHolder srcHolder, RecyclerView.ViewHolder targetHolder) {
-            // 此方法在Item拖拽交换位置时被调用。
-            // 第一个参数是要交换为之的Item，第二个是目标位置的Item。
+        public void onItemClick(View view, int adapterPosition) {
+            Toast.makeText(getActivity(), "" + adapterPosition, Toast.LENGTH_SHORT).show();
 
-            // 交换数据，并更新adapter。
-            int fromPosition = srcHolder.getAdapterPosition();
-            int toPosition = targetHolder.getAdapterPosition();
-            Collections.swap(stringList, fromPosition, toPosition);
-            mAdapter.notifyItemMoved(fromPosition, toPosition);
-
-
-            // 返回true，表示数据交换成功，ItemView可以交换位置。
-            return true;
-        }
-
-        @Override
-        public void onItemDismiss(RecyclerView.ViewHolder srcHolder) {
-            // 此方法在Item在侧滑删除时被调用。
-
-            // 从数据源移除该Item对应的数据，并刷新Adapter。
-            int position = srcHolder.getAdapterPosition();
-            stringList.remove(position);
-            mAdapter.notifyItemRemoved(position);
-
+            //获取数据
+            String setting_day=mRecycleViewList.get(adapterPosition).getSetting_day();
+            String activity_tip = mRecycleViewList.get(adapterPosition).getActivity_tip();
+            String activity_name = mRecycleViewList.get(adapterPosition).getActivity_name();
+            //发送数据
+            /**
+             * 待实现——应该是跳到其他页面再保存，不然跳到AddItemActivity中会新增一条数据
+             * */
+            Intent intent=new Intent(getActivity(),AddItemActivity.class);
+            intent.putExtra("setting_day",setting_day);
+            intent.putExtra("activity_tip",activity_tip);
+            intent.putExtra("activity_name",activity_name);
+            intent.putExtra("position",adapterPosition+"");
+            startActivityForResult(intent,1);
         }
     };
+    //RecycleView的三个单击方法
+//    /*侧滑和删除*/
+//    OnItemMoveListener mItemMoveListener = new OnItemMoveListener() {
+//
+//
+//        @Override
+//        public boolean onItemMove(RecyclerView.ViewHolder srcHolder, RecyclerView.ViewHolder targetHolder) {
+//            // 此方法在Item拖拽交换位置时被调用。
+//            // 第一个参数是要交换为之的Item，第二个是目标位置的Item。
+//
+//            // 交换数据，并更新adapter。
+//            int fromPosition = srcHolder.getAdapterPosition();
+//            int toPosition = targetHolder.getAdapterPosition();
+//            Collections.swap(stringList, fromPosition, toPosition);
+//            mAdapter.notifyItemMoved(fromPosition, toPosition);
+//
+//
+//            // 返回true，表示数据交换成功，ItemView可以交换位置。
+//            return true;
+//        }
+//
+//        @Override
+//        public void onItemDismiss(RecyclerView.ViewHolder srcHolder) {
+//            // 此方法在Item在侧滑删除时被调用。
+//
+//            // 从数据源移除该Item对应的数据，并刷新Adapter。
+//            int position = srcHolder.getAdapterPosition();
+//            stringList.remove(position);
+//            mAdapter.notifyItemRemoved(position);
+//
+//        }
+//    };
 
     /**
      * 文件操作
@@ -363,13 +305,22 @@ public class IndexFragment extends Fragment {
         AscSort();
         SaveData(mRecycleViewList);
         if (mAdapter != null) {
-
             mAdapter.notifyDataSetChanged();
         }
-
+    }
+    /*更新文件操作*/
+    public void UpdateData(String position,String activity_title,String activity_tip,String time_pick){
+        mRecycleViewList.get(Integer.parseInt(position)).setActivity_name(activity_title);
+        mRecycleViewList.get(Integer.parseInt(position)).setActivity_tip(activity_tip);
+        mRecycleViewList.get(Integer.parseInt(position)).setSetting_day(time_pick);
+        AscSort();
+        SaveData(mRecycleViewList);
+        mAdapter.notifyDataSetChanged();
     }
 
-    /*重新排序集合*/
+    /**
+     * 重新排序集合
+     * */
     public void AscSort() {
         /**根据剩余天数按升序排序*/
         Collections.sort(mRecycleViewList, new Comparator<ActivityNameItem>() {
@@ -392,7 +343,7 @@ public class IndexFragment extends Fragment {
             }
         });
 
-        /**小于0的排在后面*/
+        //小于0的排在后面
         /*找出几个小于0的*/
         int j = 0;                /*记录有几个日期是小于0的*/
         for (int i = 0; i < mRecycleViewList.size(); i++) {
@@ -437,6 +388,147 @@ public class IndexFragment extends Fragment {
             edit.commit();
         } else {                      //不是第一次运行
 
+        }
+    }
+
+    /**以下为内部类
+    /**
+     * 可滑动的RecycleView
+     */
+    /*滑动item的适配器*/
+    public class SlideAdapter extends RecyclerView.Adapter<SlideAdapter.SlideViewHolder> {
+        private OnItemClickListener mOnItemClickListener;
+        private Context mContext;
+        private List<ActivityNameItem> mList;
+
+        //构造函数
+        //空构造
+        public SlideAdapter(FragmentActivity activity, List<ActivityNameItem> mRecycleViewList) {
+        }
+
+        //带参数构造
+        public SlideAdapter(Context mContext, List<ActivityNameItem> mList) {
+            this.mContext = mContext;
+            this.mList = mList;
+        }
+        //构造函数
+
+        //重写Item单击方法
+        public void setmOnItemClickListener(OnItemClickListener mOnItemClickListener) {
+            this.mOnItemClickListener = mOnItemClickListener;
+        }
+
+        //以下是Adapter必须实现的3个方法
+        //1.
+        @Override
+        public SlideViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return new SlideViewHolder(LayoutInflater.from(getActivity()).inflate(R.layout.layout_add_item, null));
+        }
+
+        //2.
+        @Override
+        public void onBindViewHolder(@NonNull SlideViewHolder holder, @SuppressLint("RecyclerView") final int position) {
+            //填充数据
+            holder.activity_name.setText(mRecycleViewList.get(position).getActivity_name());
+            holder.setting_day.setText(mRecycleViewList.get(position).getSetting_day());
+
+            /*设置剩余时间*/
+            try {
+                //获取当前系统时间
+                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
+                String format = df.format(new Date());
+                int day = Integer.parseInt(DateSubUtils.getTwoDateSub(mRecycleViewList.get(position).getSetting_day(), format));
+                /*如果天数小于0，则文字置灰*/
+                if (day < 0) {
+                    //System.out.println("第" + position + "项置灰：");
+                    holder.residue_day.setText(-day + "");
+                    holder.residue_day.setTextColor(Color.parseColor("#77666666"));
+                    holder.residue.setText("天前");
+                    holder.residue.setTextColor(Color.parseColor("#77666666"));
+                    holder.residue.setBackgroundResource(R.drawable.style_radiu_line_grey);
+                    holder.activity_name.setTextColor(Color.parseColor("#77666666"));
+                    holder.setting_day.setTextColor(Color.parseColor("#77666666"));
+                    holder.tip.setTextColor(Color.parseColor("#77666666"));
+                }
+                /*如果天数大于0*/
+                else {
+                    holder.residue_day.setText(day + "");
+                    holder.residue_day.setTextColor(Color.parseColor("#8A000000"));
+                    holder.residue.setText("天后");
+                    holder.residue.setTextColor(Color.parseColor("#f0f0f4"));
+                    holder.activity_name.setTextColor(Color.parseColor("#e9e7ef"));
+                    holder.setting_day.setTextColor(Color.parseColor("BLACK"));
+                    holder.tip.setTextColor(Color.parseColor("#8A000000"));
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            /*设置备注*/
+            if (mRecycleViewList.get(position).getActivity_tip().isEmpty()) {
+                holder.tip.setText("备注：无备注");
+            } else {
+                holder.tip.setText("备注：" + mRecycleViewList.get(position).getActivity_tip());
+            }
+
+            //在Adapter实现OnItemClickListener方法
+            if (mOnItemClickListener != null) {
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mOnItemClickListener.onItemClick(holder.itemView, position);
+                    }
+                });
+            }
+        }
+
+        //3.
+        @Override
+        public int getItemCount() {
+            return mRecycleViewList.size();
+        }
+        //以上是Adapter必须实现的3个方法
+
+        //Adapter的内部类ViewHolder
+        public class SlideViewHolder extends RecyclerView.ViewHolder {
+            private final TextView activity_name;
+            private final TextView setting_day;
+            private final TextView tip;
+            private final TextView residue_day;
+            private final TextView residue;
+
+            public SlideViewHolder(@NonNull View itemView) {
+                super(itemView);
+                activity_name = (TextView) itemView.findViewById(R.id.activity_name);
+                setting_day = (TextView) itemView.findViewById(R.id.setting_day);
+                tip = (TextView) itemView.findViewById(R.id.tip);
+                residue_day = (TextView) itemView.findViewById(R.id.residue_day);
+                residue = (TextView) itemView.findViewById(R.id.residue);
+            }
+        }
+        //Adapter的内部类ViewHolder
+    }
+
+    /**
+     * 设置item间隔
+     * */
+    public class SpacesItemDecoration extends RecyclerView.ItemDecoration {
+        private int space;
+
+        public SpacesItemDecoration(int space) {
+            this.space = space;
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view,
+                                   RecyclerView parent, RecyclerView.State state) {
+            outRect.left = space;
+            outRect.right = space;
+            outRect.bottom = space;
+
+            // Add top margin only for the first item to avoid double space between items
+            if (parent.getChildPosition(view) == 0)
+                outRect.top = space;
         }
     }
 
